@@ -1,0 +1,42 @@
+- name: Create ec2 and Route 53
+  hosts: all
+  connection: local
+  vars:
+    sg_id: sg-00f94d2d4935c0d01
+    ami_id: ami-0220d79f3f480ecf5
+    domain_name: laddudevops86.fun
+    env: dev 
+    action: create 
+    instances: 
+    - mongodb
+    - catalogue
+  
+  tasks:
+  - name: create ec2 instance
+    amazon.aws.ec2_instance:
+      instance_type: "t3.micro"
+      security_group: "{{ sg_id }}"
+      image_id: "{{ ami_id }}"
+      name: "{{ item }}-{{ env }}"
+      tags: 
+        Project: roboshop
+        component: "{{ env }}"
+        Environment: "{{ env }}"
+        Name: "{{ item }}-{{ env }}"
+    loop: "{{ instances }}"
+    register: ec2_output
+    when: action == "create"
+
+  - name: print the output
+    ansible.builtin.debug:
+      msg: "{{ ec2_output }}"
+    when: action == "create"
+
+  # - name: Add new.foo.com as an SSHFP record
+  #   amazon.aws.route53:
+  #     state: present
+  #     zone: test-zone.com
+  #     record: new.foo.com
+  #     type: SSHFP
+  #     ttl: 7200
+  #     value: 1 1 11F1A11D1111112B111C1B11B1C11C11C1234567
