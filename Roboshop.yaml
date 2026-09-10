@@ -6,7 +6,7 @@
     ami_id: ami-0220d79f3f480ecf5
     domain_name: laddudevops86.fun
     env: dev 
-    action: create 
+    action: destroy  
     instances: 
     - mongodb
     - catalogue
