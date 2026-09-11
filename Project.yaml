@@ -1,28 +1,27 @@
-- name: Create ec2 and Route 53
+- name: create ec2 and route53
   hosts: all
   connection: local
-  vars:
-    sg_id: sg-00f94d2d4935c0d01
-    ami_id: ami-0220d79f3f480ecf5
-    domain_name: laddudevops86.fun
-    env: dev 
-    action: create  
+  vars: 
+    sg_id: "sg-07718e2f0115aadf5"
+    ami_id: "ami-0220d79f3f480ecf5"
+    domain_name: "laddudevops86.fun"
+    env: "dev"
+    action: create
     instances: 
     - mongodb
     - catalogue
-  
-  tasks:
-  - name: create ec2 instance
+
+  tasks: 
+  - name: create ec2-instance
     amazon.aws.ec2_instance:
-      instance_type: "t3.micro"
-      security_group: "{{ sg_id }}"
-      image_id: "{{ ami_id }}"
-      name: "{{ item }}-{{ env }}"
-      tags: 
-        Project: roboshop
-        component: "{{ env }}"
-        Environment: "{{ env }}"
-        Name: "{{ item }}-{{ env }}"
+       instance_type: "t3.micro"
+       security_group: "{{ sg_id }}"
+       ami_id: "{{ ami_id }}"
+       tags:
+         Project: roboshop
+         component: "{{ env }}"
+         Environment: "{{ env }}"
+         Name: "{{ item }}-{{ env }}"
     loop: "{{ instances }}"
     register: ec2_output
     when: action == "create"
@@ -36,34 +35,34 @@
     amazon.aws.route53:
       state: present
       zone: "{{ domain_name }}"
-      record: "{{ item.item }}-{{ env }}.{{ domain_name }}"
+      record: "{{ item.item }}-{{ env }}.{{ domain_name}}"
       type: A 
       ttl: 1
-      value: "{{ item.instances[0].private_ip_address }}"
+      value: "{{ item.instances[0].private_ip_address}}"
       wait: false
-      overwrite: true 
+      overwrite: true
     loop: "{{ ec2_output.results }}"
     when: action == "create"
   
-  - name: create r53 record for fronted
+  - name: create r53 record for frontend
     amazon.aws.route53:
       state: present
       zone: "{{ domain_name }}"
-      record: "roboshop-{{ env }}.{{ domain_name }}"
+      record: "roboshop-{{ env }}.{{ domain_name}}"
       type: A 
       ttl: 1
-      value: "{{ item.instances[0].public_ip_address }}"
+      value: "{{ item.instances[0].public_ip_address}}"
       wait: false
       overwrite: true
     loop: "{{ ec2_output.results }}"
     when:
     - item.item == "frontend"
     - action == "create"
-  - name: delete r53 records for fronted 
+  
+  - name: delete r53 records for frontend
     amazon.aws.route53:
       state: absent
       zone: "{{ domain_name }}"
-      record: "roboshop-{{ env }}.{{ domain_name }}"
       type: A 
       ttl: 1
     loop: "{{ instances }}"
@@ -71,11 +70,11 @@
     - item == "frontend"
     - action == "destroy"
 
-  - name: delete r53 records
+  - name: delete r53 records 
     amazon.aws.route53:
       state: absent
       zone: "{{ domain_name }}"
-      record: "{{ item }}-{{ env }}.{{ domain_name }}" 
+      record: "{{ item }}-{{ env }}.{{ domain_name }}"
       type: A 
       ttl: 1
     loop: "{{ instances }}"
@@ -89,3 +88,24 @@
     loop: "{{ instances }}"
     when: action == "destroy"
 
+
+
+
+
+
+
+
+
+
+    
+- name: start an instance with metadata options
+  amazon.aws.ec2_instance:
+    name: "public-metadataoptions-instance"
+    vpc_subnet_id: subnet-5calable
+    instance_type: t3.small
+    image_id: ami-123456
+    tags:
+      Environment: Testing
+    metadata_options:
+      http_endpoint: enabled
+      http_tokens: optional
