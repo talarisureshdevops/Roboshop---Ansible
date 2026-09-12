@@ -32,7 +32,7 @@
   - name: delete cart zip file
     ansible.builtin.file:
       path: /tmp/cart.zip
-      atate: absent
+      state: absent
 
   - name: download cart 
     ansible.builtin.get_url:
