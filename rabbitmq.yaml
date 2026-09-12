@@ -1,5 +1,5 @@
 - name: configure rebbitmq 
-  hosts: rebbitmq
+  hosts: rabbitmq
   become: yes
 
   tasks:
