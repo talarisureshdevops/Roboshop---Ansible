@@ -39,7 +39,7 @@
       url: https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
       dest: /tmp/catalogue.zip
   
-  - name: unarchieve catalogue]
+  - name: unarchieve catalogue
     ansible.builtin.unarchive:
       src: /tmp/catalogue.zip
       dest: /app
